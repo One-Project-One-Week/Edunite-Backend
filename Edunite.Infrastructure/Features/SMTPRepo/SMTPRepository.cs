@@ -1,0 +1,31 @@
+﻿using Edunite.Domain.Features.SMTPRepo;
+using Edunite.DTO.Features.UserAuth.SMTPInfo;
+using MailKit.Security;
+using MimeKit;
+using MailKit.Net.Smtp;
+
+namespace Edunite.Infrastructure.Features.SMTPRepo
+{
+    public class SMTPRepository : ISMTPEmail
+    {
+        public required SmtpInfo _smtpInfo;
+        public SMTPRepository(SmtpInfo smtpInfo)
+        {
+            _smtpInfo = smtpInfo;
+        }
+        public async Task SentPasswordAsync(string toEmail, string subject, string body)
+        {
+            var email = new MimeMessage();
+            email.From.Add(MailboxAddress.Parse(_smtpInfo.smtpEmail));
+            email.To.Add(MailboxAddress.Parse(toEmail));
+            email.Subject = subject;
+            email.Body = new TextPart(MimeKit.Text.TextFormat.Html) { Text = body };
+
+            using var smtp = new SmtpClient();
+            await smtp.ConnectAsync("smtp.gmail.com", 587, SecureSocketOptions.StartTls);
+            await smtp.AuthenticateAsync(_smtpInfo.smtpEmail, _smtpInfo.smtpPassword);
+            await smtp.SendAsync(email);
+            await smtp.DisconnectAsync(true);
+        }
+    }
+}

@@ -1,0 +1,6 @@
+@Edunite.Presentation_HostAddress = http://localhost:5236
+
+GET {{Edunite.Presentation_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
